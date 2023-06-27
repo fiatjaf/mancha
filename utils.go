@@ -1,16 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
 	"net/http"
+	"sync"
 
 	_ "golang.org/x/image/webp"
 
+	"github.com/dgraph-io/ristretto/z"
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/puzpuzpuz/xsync"
 )
@@ -84,21 +85,42 @@ func generateNeutralImage(color color.Color) image.Image {
 
 var imagesCache = xsync.NewMapOf[image.Image]()
 
-func imageFromURL(u string) image.Image {
-	res, _ := imagesCache.LoadOrCompute(u, func() image.Image {
-		fmt.Println("LOADING", u)
-		response, err := http.Get(u)
-		if err != nil {
-			return nil
-		}
-		defer response.Body.Close()
+func imageFromURL(u string) (res image.Image) {
+	res, ok := imagesCache.Load(u)
+	if ok {
+		return res
+	}
 
-		img, _, err := image.Decode(response.Body)
-		if err != nil {
-			return nil
-		}
+	// this is so that we only try to load the same url once
+	unlock := namedLock(u)
+	defer unlock()
 
-		return img
-	})
-	return res
+	// store result on cache (even if it's nil)
+	defer func() {
+		imagesCache.Store(u, res)
+	}()
+
+	// load url
+	response, err := http.Get(u)
+	if err != nil {
+		return nil
+	}
+	defer response.Body.Close()
+
+	img, _, err := image.Decode(response.Body)
+	if err != nil {
+		return nil
+	}
+
+	return img
+}
+
+const MAX_LOCKS = 50
+
+var namedMutexPool = make([]sync.Mutex, MAX_LOCKS)
+
+func namedLock(name string) (unlock func()) {
+	idx := z.MemHashString(name) % MAX_LOCKS
+	namedMutexPool[idx].Lock()
+	return namedMutexPool[idx].Unlock
 }

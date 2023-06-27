@@ -23,7 +23,7 @@ func publishChat(message string) error {
 		ev := nostr.Event{
 			CreatedAt: nostr.Now(),
 			Kind:      9,
-			Tags:      nostr.Tags{nostr.Tag{"g", selectedGroupID, u.Host}},
+			Tags:      nostr.Tags{nostr.Tag{"g", selectedGroupID, u.Hostname()}},
 			Content:   message,
 		}
 		if err := k.Sign(&ev); err != nil {

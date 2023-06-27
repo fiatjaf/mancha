@@ -102,7 +102,7 @@ func main() {
 
 	chatInputWidget := widget.NewMultiLineEntry()
 	chatInputWidget.Wrapping = fyne.TextWrapWord
-	chatInputWidget.SetPlaceHolder("Your message here... shft+enter to Submit")
+	chatInputWidget.SetPlaceHolder("Your message here... shift+enter to Submit")
 	chatInputWidget.OnSubmitted = func(s string) {
 		go func() {
 			if s == "" {
