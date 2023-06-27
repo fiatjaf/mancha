@@ -6,7 +6,7 @@ require (
 	fyne.io/fyne/v2 v2.3.6-0.20230626132446-b9256d9ede84
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/mitchellh/go-homedir v1.0.0
-	github.com/nbd-wtf/go-nostr v0.18.7
+	github.com/nbd-wtf/go-nostr v0.19.1
 	github.com/puzpuzpuz/xsync v1.5.2
 	github.com/zalando/go-keyring v0.2.3
 	golang.org/x/image v0.7.0

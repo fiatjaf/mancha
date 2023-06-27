@@ -109,7 +109,10 @@ func main() {
 				return
 			}
 			chatInputWidget.SetText("")
-			publishChat(s)
+			if err := publishChat(s); err != nil {
+				// TODO show a message to user about this error
+				fmt.Println("failed to publish:", err)
+			}
 		}()
 	}
 
@@ -308,9 +311,7 @@ func addGroup(relayURL string, groupId string, relaysListWidget *widget.List, ch
 	chatRelay.Groups.Store(groupId, group)
 
 	ctx := context.Background()
-	sub := chatRelay.Relay.PrepareSubscription(ctx)
-	sub.SetLabel("chat" + groupId)
-	sub.Filters = []nostr.Filter{
+	sub, err := chatRelay.Relay.Subscribe(ctx, []nostr.Filter{
 		{
 			Kinds: []int{9},
 			Tags: nostr.TagMap{
@@ -323,6 +324,10 @@ func addGroup(relayURL string, groupId string, relaysListWidget *widget.List, ch
 				"d": {groupId},
 			},
 		},
+	}, nostr.WithLabel("chat"+groupId))
+	if err != nil {
+		fmt.Println("can't subscribe", chatRelay.Relay, groupId, err)
+		return
 	}
 
 	chatRelay.Subscriptions.Store(groupId, sub)

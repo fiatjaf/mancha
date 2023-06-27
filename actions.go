@@ -15,7 +15,6 @@ import (
 func publishChat(message string) error {
 	chatRelay, _ := relays.Load(selectRelayURL)
 	if chatRelay.Relay.URL == selectRelayURL {
-		fmt.Println("Publishing to", chatRelay.Relay.URL)
 		u, err := url.Parse(chatRelay.Relay.URL)
 		if err != nil {
 			panic(err)
@@ -32,6 +31,9 @@ func publishChat(message string) error {
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
+
+		fmt.Println("publishing to", chatRelay.Relay.URL, ev)
+
 		res, err := chatRelay.Relay.Publish(ctx, ev)
 		if err != nil {
 			return err
