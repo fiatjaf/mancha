@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/nbd-wtf/go-nostr"
+	"github.com/nbd-wtf/go-nostr/nip19"
 	"github.com/zalando/go-keyring"
 )
 
@@ -103,4 +105,30 @@ func (f FileKeystore) Sign(event *nostr.Event) error {
 
 	keyhex := hex.EncodeToString(data)
 	return event.Sign(keyhex)
+}
+
+func saveKey(value string) error {
+	if strings.HasPrefix(value, "nsec") {
+		_, hex, err := nip19.Decode(value)
+		if err != nil {
+			return err
+		}
+
+		err = k.Save(hex.(string))
+		if err != nil {
+			return err
+		}
+	} else {
+		publicKey, err := nostr.GetPublicKey(value)
+		if err != nil {
+			return err
+		}
+		if nostr.IsValidPublicKeyHex(publicKey) {
+			if err := k.Save(value); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

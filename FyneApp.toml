@@ -1,8 +1,8 @@
-Website = "https://github.com/Galaxoid-Labs/nostr-chat-fyne"
+Website = "https://github.com/fiatjaf/mancha"
 
 [Details]
 Icon = "Icon.png"
-Name = "Nostr Chat"
-ID = "com.galaxoidlabs.nostrchat"
+Name = "Mancha"
+ID = "com.nostr.mancha"
 Version = "0.1.0"
 Build = 1

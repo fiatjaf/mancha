@@ -6,30 +6,28 @@ import (
 	"time"
 
 	"github.com/nbd-wtf/go-nostr"
-	"github.com/puzpuzpuz/xsync"
+	sdk "github.com/nbd-wtf/nostr-sdk"
+	"github.com/puzpuzpuz/xsync/v2"
 	"golang.org/x/sync/singleflight"
 )
 
 var (
-	people              = xsync.NewMapOf[*nostr.ProfileMetadata]()
-	pool                = nostr.NewSimplePool(context.Background())
+	people              = xsync.NewMapOf[*sdk.ProfileMetadata]()
 	profileMetadataPool = new(singleflight.Group)
 )
 
-func ensurePersonMetadata(pubkey string) chan *nostr.ProfileMetadata {
-	ch := make(chan *nostr.ProfileMetadata)
+func ensurePersonMetadata(pubkey string) chan *sdk.ProfileMetadata {
+	ch := make(chan *sdk.ProfileMetadata)
 
 	go func() {
-		person, loaded := people.LoadOrCompute(pubkey, func() *nostr.ProfileMetadata {
+		person, loaded := people.LoadOrCompute(pubkey, func() *sdk.ProfileMetadata {
 			v, err, _ := profileMetadataPool.Do(pubkey, func() (any, error) {
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 				defer cancel()
 
 				events := pool.SubManyEose(ctx, []string{
 					"wss://purplepag.es",
-					"wss://relay.damus.io",
-					"wss://relay.nostr.bg",
-					"wss://nostr-pub.wellorder.net",
+					"wss://relay.noswhere.com",
 					"wss://relay.nostr.band",
 				}, nostr.Filters{
 					{
@@ -42,17 +40,17 @@ func ensurePersonMetadata(pubkey string) chan *nostr.ProfileMetadata {
 				}
 
 				var kind10002 *nostr.Event
-				for evt := range events {
-					switch evt.Kind {
+				for ie := range events {
+					switch ie.Event.Kind {
 					case 0:
 						// we got the metadata directly, so just use that
-						if metadata, err := nostr.ParseMetadata(*evt); err == nil {
+						if metadata, err := sdk.ParseMetadata(ie.Event); err == nil {
 							return metadata, nil
 						}
 					case 10002:
 						// we got a relay list, we may use this if we don't get any metadata
-						if kind10002 == nil || kind10002.CreatedAt < evt.CreatedAt {
-							kind10002 = evt
+						if kind10002 == nil || kind10002.CreatedAt < ie.Event.CreatedAt {
+							kind10002 = ie.Event
 						}
 					}
 				}
@@ -80,8 +78,8 @@ func ensurePersonMetadata(pubkey string) chan *nostr.ProfileMetadata {
 					return nil, fmt.Errorf("subscriptions (second) couldn't be created")
 				}
 
-				for evt := range events {
-					if metadata, err := nostr.ParseMetadata(*evt); err == nil {
+				for ie := range events {
+					if metadata, err := sdk.ParseMetadata(ie.Event); err == nil {
 						return metadata, nil
 					}
 				}
@@ -91,10 +89,10 @@ func ensurePersonMetadata(pubkey string) chan *nostr.ProfileMetadata {
 
 			if err != nil {
 				fmt.Println("failed to load metadata for", pubkey)
-				return &nostr.ProfileMetadata{} // an empty thing so we don't try to load again
+				return &sdk.ProfileMetadata{} // an empty thing so we don't try to load again
 			}
 
-			return v.(*nostr.ProfileMetadata)
+			return v.(*sdk.ProfileMetadata)
 		})
 		if person != nil && !loaded {
 			// this means we got something new
