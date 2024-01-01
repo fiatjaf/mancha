@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 	"github.com/nbd-wtf/go-nostr"
 	"golang.org/x/net/context"
 )
@@ -30,14 +29,8 @@ var (
 // main widgets
 var (
 	actionsWidget  = makeActionsWidget()
-	bottomWidget   = makeBottomWidget()
+	inputWidget    = makeInputWidget()
 	messagesWidget = makeMessagesWidget()
-	groupsWidget   = makeGroupsWidget()
-
-	emptyRelayListOverlay = container.NewCenter(widget.NewButtonWithIcon("Join Group", theme.StorageIcon(), func() {
-		fmt.Println("adding")
-		// addRelayDialog(relaysListWidget, chatMessagesListWidget)
-	}))
 )
 
 func main() {
@@ -56,14 +49,14 @@ func main() {
 		nil,
 		nil,
 		container.NewStack(
-			container.NewPadded(groupsWidget.widget),
-			// emptyRelayListOverlay,
+			container.NewPadded(getGroupsWidget().widget),
+			getGroupsWidget().overlay,
 		),
 	)
 
 	rightBorderContainer := container.NewBorder(
 		nil,
-		container.NewPadded(bottomWidget),
+		container.NewPadded(inputWidget.widget),
 		nil,
 		nil,
 		container.NewPadded(messagesWidget.widget),
@@ -75,9 +68,18 @@ func main() {
 	w.SetContent(splitContainer)
 
 	go func() {
-		for _, group := range loadGroups() {
-			state.groups = append(state.groups, &group)
+		loadGroups()
+		for _, group := range state.groups {
+			go func(group *Group) {
+				err := group.startListening()
+				if err != nil {
+					log.Println(err)
+				}
+			}(group)
 		}
+
+		time.Sleep(time.Second * 1)
+		inputWidget.onMount()
 	}()
 
 	w.ShowAndRun()

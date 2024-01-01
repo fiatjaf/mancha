@@ -39,8 +39,8 @@ func makeActionsWidget() *ActionWidget {
 			dialog.NewConfirm("Reset local data?", "This will remove all relays and your private key.", func(b bool) {
 				if b {
 					state.groups = nil
-					saveGroups(state.groups)
-					groupsWidget.widget.Refresh()
+					saveGroups()
+					getGroupsWidget().widget.Refresh()
 
 					messagesWidget.widget.Refresh()
 					k.Erase()

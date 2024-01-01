@@ -29,23 +29,6 @@ func generateNeutralImage(color color.Color) image.Image {
 	return img
 }
 
-// func addRelayDialog(relaysListWidget *widget.List, chatMessagesListWidget *widget.List) {
-// 	entry := widget.NewEntry()
-// 	entry.SetPlaceHolder("somerelay.com")
-// 	dialog.ShowForm("Add Relay                                             ", "Add", "Cancel", []*widget.FormItem{ // Empty space Hack to make dialog bigger
-// 		widget.NewFormItem("URL", entry),
-// 	}, func(b bool) {
-// 		if entry.Text != "" && b {
-// 			relayURL := entry.Text
-// 			if !strings.HasPrefix(relayURL, "wss://") && !strings.HasPrefix(relayURL, "ws://") {
-// 				relayURL = "wss://" + relayURL
-// 			}
-// 			addRelay(relayURL)
-// 			addGroup(relayURL, "/", relaysListWidget, chatMessagesListWidget)
-// 		}
-// 	}, w)
-// }
-//
 // func addGroup(relayURL string, groupId string, relaysListWidget *widget.List, chatMessagesListWidget *widget.List) {
 // 	chatRelay, ok := relays.Load(relayURL)
 // 	if !ok {
