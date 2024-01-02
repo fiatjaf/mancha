@@ -15,6 +15,15 @@ type MessagesWidget struct {
 	widget *widget.List
 }
 
+var _messagesWidget *MessagesWidget
+
+func getMessagesWidget() *MessagesWidget {
+	if _messagesWidget == nil {
+		_messagesWidget = makeMessagesWidget()
+	}
+	return _messagesWidget
+}
+
 func makeMessagesWidget() *MessagesWidget {
 	mw := &MessagesWidget{}
 

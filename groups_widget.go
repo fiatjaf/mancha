@@ -21,13 +21,13 @@ type GroupsWidget struct {
 	overlay *fyne.Container
 }
 
-var groupsWidget *GroupsWidget
+var _groupsWidget *GroupsWidget
 
 func getGroupsWidget() *GroupsWidget {
-	if groupsWidget == nil {
-		groupsWidget = makeGroupsWidget()
+	if _groupsWidget == nil {
+		_groupsWidget = makeGroupsWidget()
 	}
-	return groupsWidget
+	return _groupsWidget
 }
 
 func makeGroupsWidget() *GroupsWidget {
@@ -73,9 +73,9 @@ func makeGroupsWidget() *GroupsWidget {
 
 	gw.widget.OnSelected = func(i widget.ListItemID) {
 		state.selected = state.groups[i]
-		inputWidget.enable()
-		messagesWidget.widget.Refresh()
-		messagesWidget.widget.ScrollToBottom()
+		getInputWidget().enable()
+		getMessagesWidget().widget.Refresh()
+		getMessagesWidget().widget.ScrollToBottom()
 	}
 
 	gw.overlay = container.NewCenter(

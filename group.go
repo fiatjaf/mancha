@@ -90,6 +90,8 @@ func (group *Group) startListening() error {
 		return fmt.Errorf("failed to subscribe to '%s': %w", relay.URL, err)
 	}
 
+	messagesWidget := getMessagesWidget()
+
 	eosed := false
 	for {
 		select {
@@ -112,6 +114,7 @@ func (group *Group) startListening() error {
 			case 39000:
 				group.MergeInMetadataEvent(evt)
 				getGroupsWidget().widget.Refresh()
+				saveGroups()
 			case 39001:
 			case 39002:
 			case 9:

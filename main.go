@@ -26,13 +26,6 @@ var (
 	pool = nostr.NewSimplePool(context.Background())
 )
 
-// main widgets
-var (
-	actionsWidget  = makeActionsWidget()
-	inputWidget    = makeInputWidget()
-	messagesWidget = makeMessagesWidget()
-)
-
 func main() {
 	a = app.NewWithID(APPID)
 	w = a.NewWindow(APP_TITLE)
@@ -45,7 +38,7 @@ func main() {
 
 	leftBorderContainer := container.NewBorder(
 		nil,
-		container.NewPadded(actionsWidget.widget),
+		container.NewPadded(getActionWidget().widget),
 		nil,
 		nil,
 		container.NewStack(
@@ -56,10 +49,10 @@ func main() {
 
 	rightBorderContainer := container.NewBorder(
 		nil,
-		container.NewPadded(inputWidget.widget),
+		container.NewPadded(getInputWidget().widget),
 		nil,
 		nil,
-		container.NewPadded(messagesWidget.widget),
+		container.NewPadded(getMessagesWidget().widget),
 	)
 
 	splitContainer := container.NewHSplit(leftBorderContainer, rightBorderContainer)
@@ -79,7 +72,7 @@ func main() {
 		}
 
 		time.Sleep(time.Second * 1)
-		inputWidget.onMount()
+		getInputWidget().onMount()
 	}()
 
 	w.ShowAndRun()

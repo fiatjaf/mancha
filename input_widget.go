@@ -10,17 +10,25 @@ import (
 
 type InputWidget struct {
 	widget *fyne.Container
-	input  *middleClickHandlerEntry
+	input  *EnhancedEntry
 	button *widget.Button
+}
+
+var _inputWidget *InputWidget
+
+func getInputWidget() *InputWidget {
+	if _inputWidget == nil {
+		_inputWidget = makeInputWidget()
+	}
+	return _inputWidget
 }
 
 func makeInputWidget() *InputWidget {
 	iw := &InputWidget{}
 
-	iw.input = &middleClickHandlerEntry{}
-	iw.input.ExtendBaseWidget(iw.input)
-	iw.input.Wrapping = fyne.TextWrapOff
-	iw.input.MultiLine = false
+	iw.input = newEnhancedEntry()
+	iw.input.Wrapping = fyne.TextWrapWord
+	iw.input.MultiLine = true
 	iw.input.PlaceHolder = "Your message here... shift+enter to Submit"
 	iw.input.OnSubmitted = func(s string) {
 		go func() {

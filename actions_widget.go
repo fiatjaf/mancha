@@ -8,12 +8,21 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type ActionWidget struct {
+type ActionsWidget struct {
 	widget *widget.Toolbar
 }
 
-func makeActionsWidget() *ActionWidget {
-	aw := &ActionWidget{}
+var _actionsWidget *ActionsWidget
+
+func getActionWidget() *ActionsWidget {
+	if _actionsWidget == nil {
+		_actionsWidget = makeActionsWidget()
+	}
+	return _actionsWidget
+}
+
+func makeActionsWidget() *ActionsWidget {
+	aw := &ActionsWidget{}
 
 	aw.widget = widget.NewToolbar(
 		widget.NewToolbarAction(theme.AccountIcon(), func() {
@@ -41,8 +50,7 @@ func makeActionsWidget() *ActionWidget {
 					state.groups = nil
 					saveGroups()
 					getGroupsWidget().widget.Refresh()
-
-					messagesWidget.widget.Refresh()
+					getMessagesWidget().widget.Refresh()
 					k.Erase()
 				}
 			}, w).Show()

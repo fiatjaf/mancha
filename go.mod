@@ -61,3 +61,4 @@ require (
 )
 
 replace github.com/nbd-wtf/go-nostr => /home/fiatjaf/comp/go-nostr
+replace fyne.io/fyne/v2 => /home/fiatjaf/comp/fyne
