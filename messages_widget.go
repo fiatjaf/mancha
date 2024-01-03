@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 
 	"fyne.io/fyne/v2"
@@ -51,9 +50,11 @@ func makeMessagesWidget() *MessagesWidget {
 			evt := state.selected.messages[i]
 			container := o.(*fyne.Container)
 
+			name := "[ " + evt.PubKey[0:8] + " ]"
 			if metadata, _ := people.Load(evt.PubKey); metadata != nil {
-				container.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*canvas.Text).Text = fmt.Sprintf("[ %s ]", metadata.ShortName())
+				name = metadata.ShortName()
 			}
+			container.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*canvas.Text).Text = name
 			container.Objects[0].(*widget.Label).SetText(evt.Content)
 			mw.widget.SetItemHeight(i, o.(*fyne.Container).Objects[0].(*widget.Label).MinSize().Height)
 		},

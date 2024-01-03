@@ -29,9 +29,7 @@ func saveGroups() {
 
 func loadGroups() {
 	jstr := a.Preferences().String(SAVED_GROUPS_KEY)
-	var data []*Group
-	json.Unmarshal([]byte(jstr), &data)
-	state.groups = data
+	json.Unmarshal([]byte(jstr), &state.groups)
 }
 
 func joinGroup(relayURL string, groupId string) (*Group, error) {
@@ -124,12 +122,23 @@ func (group *Group) startListening() error {
 					continue
 				}
 
+				ensureMetadataThenRefresh := func(pubkey string) {
+					wasCached, isCachedNow := people.ensurePersonMetadata(pubkey, sub.Relay.URL)
+					if wasCached {
+						return
+					}
+					if !isCachedNow {
+						return
+					}
+					messagesWidget.widget.Refresh()
+				}
+
 				// now we assume most messages will be appended to the end
 				if len(group.messages) == 0 || evt.CreatedAt > group.messages[len(group.messages)-1].CreatedAt {
 					group.messages = append(group.messages, evt)
-					fmt.Println("group.messages", len(group.messages))
 					messagesWidget.widget.Refresh()
 					messagesWidget.widget.ScrollToBottom()
+					go ensureMetadataThenRefresh(evt.PubKey)
 					continue
 				}
 
@@ -145,17 +154,7 @@ func (group *Group) startListening() error {
 				copy(group.messages[idx+1:], group.messages[idx:])
 				group.messages[idx] = evt
 				messagesWidget.widget.Refresh()
-
-				go func(pubkey string) {
-					wasCached, isCachedNow := ensurePersonMetadataIsCached(pubkey, sub.Relay.URL)
-					if wasCached {
-						return
-					}
-					if !isCachedNow {
-						return
-					}
-					messagesWidget.widget.Refresh()
-				}(evt.PubKey)
+				go ensureMetadataThenRefresh(evt.PubKey)
 			}
 		}
 	}

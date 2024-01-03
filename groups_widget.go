@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/nbd-wtf/go-nostr"
@@ -45,7 +44,7 @@ func makeGroupsWidget() *GroupsWidget {
 			return container.NewHBox(
 				img,
 				widget.NewLabel("template"),
-				layout.NewSpacer(),
+				widget.NewLabel("template"),
 			)
 		},
 		func(lii widget.ListItemID, o fyne.CanvasObject) {
@@ -58,11 +57,18 @@ func makeGroupsWidget() *GroupsWidget {
 
 			container.Objects[1].(*widget.Label).SetText(group.Name)
 			container.Objects[1].(*widget.Label).TextStyle = fyne.TextStyle{
-				Bold:   false,
+				Bold:   true,
 				Italic: false,
 			}
 
-			container.Objects[2].Hide()
+			container.Objects[2].(*widget.Label).SetText(group.ID)
+			container.Objects[2].(*widget.Label).TextStyle = fyne.TextStyle{
+				Bold:      false,
+				Italic:    true,
+				Monospace: true,
+			}
+			container.Objects[2].(*widget.Label).Alignment = fyne.TextAlignTrailing
+			container.Objects[2].(*widget.Label).Importance = widget.LowImportance
 		},
 	)
 

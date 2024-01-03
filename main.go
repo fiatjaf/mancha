@@ -61,6 +61,7 @@ func main() {
 	w.SetContent(splitContainer)
 
 	go func() {
+		loadPeople()
 		loadGroups()
 		for _, group := range state.groups {
 			go func(group *Group) {
