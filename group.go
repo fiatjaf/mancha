@@ -127,6 +127,7 @@ func (group *Group) startListening() error {
 				// now we assume most messages will be appended to the end
 				if len(group.messages) == 0 || evt.CreatedAt > group.messages[len(group.messages)-1].CreatedAt {
 					group.messages = append(group.messages, evt)
+					fmt.Println("group.messages", len(group.messages))
 					messagesWidget.widget.Refresh()
 					messagesWidget.widget.ScrollToBottom()
 					continue
@@ -143,7 +144,6 @@ func (group *Group) startListening() error {
 				group.messages = append(group.messages, nil) // bogus, increase capacity
 				copy(group.messages[idx+1:], group.messages[idx:])
 				group.messages[idx] = evt
-
 				messagesWidget.widget.Refresh()
 
 				go func(pubkey string) {

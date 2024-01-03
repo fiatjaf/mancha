@@ -69,6 +69,8 @@ func main() {
 					log.Println(err)
 				}
 			}(group)
+
+			getGroupsWidget().overlay.Hide()
 		}
 
 		time.Sleep(time.Second * 1)

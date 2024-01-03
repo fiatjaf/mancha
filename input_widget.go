@@ -29,7 +29,7 @@ func makeInputWidget() *InputWidget {
 	iw.input = newEnhancedEntry()
 	iw.input.Wrapping = fyne.TextWrapWord
 	iw.input.MultiLine = true
-	iw.input.PlaceHolder = "Your message here... shift+enter to Submit"
+	iw.input.PlaceHolder = "Your message here..."
 	iw.input.OnSubmitted = func(s string) {
 		go func() {
 			if s == "" {
@@ -43,17 +43,7 @@ func makeInputWidget() *InputWidget {
 		}()
 	}
 
-	iw.button = widget.NewButton("Submit", func() {
-		message := iw.input.Text
-		if message == "" {
-			return
-		}
-		go func() {
-			iw.input.SetText("")
-			publishChat(state.selected, message)
-		}()
-	})
-
+	iw.button = widget.NewButton("Submit", func() { iw.input.OnSubmitted(iw.input.Text) })
 	iw.widget = container.NewBorder(nil, nil, nil, iw.button, iw.input)
 
 	return iw

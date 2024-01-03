@@ -9,7 +9,7 @@ import (
 )
 
 func publishChat(group *Group, message string) error {
-	ev := nostr.Event{
+	evt := nostr.Event{
 		CreatedAt: nostr.Now(),
 		Kind:      9,
 		Tags: nostr.Tags{
@@ -18,7 +18,7 @@ func publishChat(group *Group, message string) error {
 		},
 		Content: message,
 	}
-	if err := k.Sign(&ev); err != nil {
+	if err := k.Sign(&evt); err != nil {
 		panic(err)
 	}
 
@@ -30,7 +30,8 @@ func publishChat(group *Group, message string) error {
 		return fmt.Errorf("failed to ensure relay '%s' in order to publish: %w", group.Relay, err)
 	}
 
-	if err := relay.Publish(ctx, ev); err != nil {
+	fmt.Println("publishing", evt)
+	if err := relay.Publish(ctx, evt); err != nil {
 		return fmt.Errorf("failed to publish: %w", err)
 	}
 

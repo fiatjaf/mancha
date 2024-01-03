@@ -44,6 +44,7 @@ func makeActionsWidget() *ActionsWidget {
 			fmt.Println("toolbar action")
 			// addRelayDialog(relaysListWidget, chatMessagesListWidget)
 		}),
+		widget.NewToolbarAction(theme.ContentAddIcon(), showAddGroupDialog),
 		widget.NewToolbarAction(theme.DeleteIcon(), func() {
 			dialog.NewConfirm("Reset local data?", "This will remove all relays and your private key.", func(b bool) {
 				if b {

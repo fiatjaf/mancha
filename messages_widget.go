@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"image/color"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -29,7 +28,10 @@ func makeMessagesWidget() *MessagesWidget {
 
 	mw.widget = widget.NewList(
 		func() int {
-			return 0
+			if state.selected == nil {
+				return 0
+			}
+			return len(state.selected.messages)
 		},
 		func() fyne.CanvasObject {
 			pubKey := canvas.NewText("template", color.RGBA{139, 190, 178, 255})
@@ -46,17 +48,13 @@ func makeMessagesWidget() *MessagesWidget {
 			return border
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
-			chatMessage := state.selected.messages[i]
+			evt := state.selected.messages[i]
+			container := o.(*fyne.Container)
 
-			var name string
-			if metadata, _ := people.Load(chatMessage.PubKey); metadata != nil && metadata.Name != "" {
-				name = fmt.Sprintf("[ %s ]", strings.TrimSpace(metadata.Name))
-			} else {
-				name = fmt.Sprintf("[ %s ]", chatMessage.PubKey[len(chatMessage.PubKey)-8:])
+			if metadata, _ := people.Load(evt.PubKey); metadata != nil {
+				container.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*canvas.Text).Text = fmt.Sprintf("[ %s ]", metadata.ShortName())
 			}
-			message := chatMessage.Content
-			o.(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*canvas.Text).Text = name
-			o.(*fyne.Container).Objects[0].(*widget.Label).SetText(message)
+			container.Objects[0].(*widget.Label).SetText(evt.Content)
 			mw.widget.SetItemHeight(i, o.(*fyne.Container).Objects[0].(*widget.Label).MinSize().Height)
 		},
 	)
