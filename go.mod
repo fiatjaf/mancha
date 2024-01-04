@@ -5,6 +5,7 @@ go 1.21
 require (
 	fyne.io/fyne/v2 v2.4.3
 	github.com/jezek/xgb v1.1.1
+	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nbd-wtf/go-nostr v0.28.0
 	github.com/nbd-wtf/nostr-sdk v0.0.5
@@ -61,4 +62,5 @@ require (
 )
 
 replace github.com/nbd-wtf/go-nostr => /home/fiatjaf/comp/go-nostr
+
 replace fyne.io/fyne/v2 => /home/fiatjaf/comp/fyne

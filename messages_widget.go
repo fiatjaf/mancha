@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/hex"
 	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"github.com/lucasb-eyer/go-colorful"
 )
 
 type MessagesWidget struct {
@@ -33,16 +35,15 @@ func makeMessagesWidget() *MessagesWidget {
 			return len(state.selected.messages)
 		},
 		func() fyne.CanvasObject {
-			pubKey := canvas.NewText("template", color.RGBA{139, 190, 178, 255})
-			pubKey.TextStyle.Bold = true
-			pubKey.Alignment = fyne.TextAlignLeading
+			name := canvas.NewText("template", color.Transparent)
+			name.TextStyle.Bold = true
+			name.Alignment = fyne.TextAlignTrailing
 
 			message := widget.NewLabel("template")
 			message.Alignment = fyne.TextAlignLeading
 			message.Wrapping = fyne.TextWrapWord
 
-			vbx := container.NewVBox(container.NewPadded(pubKey))
-			border := container.NewBorder(nil, nil, vbx, nil, message)
+			border := container.NewBorder(nil, nil, name, nil, message)
 
 			return border
 		},
@@ -50,13 +51,18 @@ func makeMessagesWidget() *MessagesWidget {
 			evt := state.selected.messages[i]
 			container := o.(*fyne.Container)
 
-			name := "[ " + evt.PubKey[0:8] + " ]"
+			name := "  [ " + evt.PubKey[0:8] + " ]"
 			if metadata, _ := people.Load(evt.PubKey); metadata != nil {
-				name = metadata.ShortName()
+				name = "  " + metadata.ShortName()
 			}
-			container.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*canvas.Text).Text = name
-			container.Objects[0].(*widget.Label).SetText(evt.Content)
 			mw.widget.SetItemHeight(i, o.(*fyne.Container).Objects[0].(*widget.Label).MinSize().Height)
+
+			nameLabel := container.Objects[1].(*canvas.Text)
+			nameLabel.Text = name
+			lastByte, _ := hex.DecodeString(evt.PubKey[62:])
+			nameLabel.Color = colorful.Hsl(float64(lastByte[0])/256*360, 0.41, 0.55)
+
+			container.Objects[0].(*widget.Label).Text = evt.Content
 		},
 	)
 

@@ -15,17 +15,12 @@ const MAX_LOCKS = 50
 var (
 	namedMutexPool = make([]sync.Mutex, MAX_LOCKS)
 	imagesCache    = xsync.NewMapOf[image.Image]()
-	neutralImage   = generateNeutralImage(color.RGBA{156, 62, 93, 255})
+	transparentBox = boxImage(color.Transparent)
 )
 
-func generateNeutralImage(color color.Color) image.Image {
-	const size = 1
-	img := image.NewRGBA(image.Rect(0, 0, size, size))
-	for x := 0; x < size; x++ {
-		for y := 0; y < size; y++ {
-			img.Set(x, y, color)
-		}
-	}
+func boxImage(color color.Color) image.Image {
+	img := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	img.Set(0, 0, color)
 	return img
 }
 

@@ -9,8 +9,10 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/lucasb-eyer/go-colorful"
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/nbd-wtf/go-nostr/nip19"
 )
@@ -38,42 +40,45 @@ func makeGroupsWidget() *GroupsWidget {
 			return len(state.groups)
 		},
 		func() fyne.CanvasObject {
-			img := canvas.NewImageFromImage(neutralImage)
+			img := canvas.NewImageFromImage(transparentBox)
 			img.SetMinSize(fyne.NewSize(36, 36))
 
-			return container.NewHBox(
-				img,
-				widget.NewLabel("template"),
-				widget.NewLabel("template"),
-			)
-		},
-		func(lii widget.ListItemID, o fyne.CanvasObject) {
-			container := o.(*fyne.Container)
-
-			group := state.groups[lii]
-			if group.Picture != "" {
-				container.Objects[0].(*canvas.Image).Image = imageFromURL(group.Picture)
-			}
-
-			container.Objects[1].(*widget.Label).SetText(group.Name)
-			container.Objects[1].(*widget.Label).TextStyle = fyne.TextStyle{
-				Bold:   true,
-				Italic: false,
-			}
-
-			container.Objects[2].(*widget.Label).SetText(group.ID)
-			container.Objects[2].(*widget.Label).TextStyle = fyne.TextStyle{
+			idLabel := canvas.NewText("id", theme.DisabledColor())
+			idLabel.Alignment = fyne.TextAlignTrailing
+			idLabel.TextStyle = fyne.TextStyle{
 				Bold:      false,
 				Italic:    true,
 				Monospace: true,
 			}
-			container.Objects[2].(*widget.Label).Alignment = fyne.TextAlignTrailing
-			container.Objects[2].(*widget.Label).Importance = widget.LowImportance
+
+			return container.NewHBox(
+				img,
+				widget.NewLabelWithStyle("template", fyne.TextAlignLeading, fyne.TextStyle{
+					Bold:   true,
+					Italic: false,
+				}),
+				layout.NewSpacer(),
+				idLabel,
+			)
+		},
+		func(lii widget.ListItemID, o fyne.CanvasObject) {
+			container := o.(*fyne.Container)
+			group := state.groups[lii]
+			if group.Picture == "" {
+				byte := []byte(group.Name[0:1])[0]
+				hue := float64(byte*byte*byte) / 256 * 360
+				container.Objects[0].(*canvas.Image).Image = boxImage(colorful.Hsl(hue, 0.48, 0.52))
+			} else {
+				container.Objects[0].(*canvas.Image).Image = imageFromURL(group.Picture)
+			}
+			container.Objects[1].(*widget.Label).SetText(group.Name)
+			container.Objects[3].(*canvas.Text).Text = group.ID
 		},
 	)
 
 	gw.widget.OnSelected = func(i widget.ListItemID) {
 		state.selected = state.groups[i]
+		gw.widget.RefreshItem(i)
 		getInputWidget().enable()
 		getMessagesWidget().widget.Refresh()
 		getMessagesWidget().widget.ScrollToBottom()
