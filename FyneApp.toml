@@ -1,8 +1,0 @@
-Website = "https://github.com/fiatjaf/mancha"
-
-[Details]
-Icon = "Icon.png"
-Name = "Mancha"
-ID = "com.nostr.mancha"
-Version = "0.1.0"
-Build = 1

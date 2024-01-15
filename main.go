@@ -1,64 +1,70 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/container"
+	"github.com/diamondburned/gotk4/pkg/gio/v2"
+	"github.com/diamondburned/gotk4/pkg/glib/v2"
+	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 	"github.com/nbd-wtf/go-nostr"
 	"golang.org/x/net/context"
 )
 
 const (
 	APP_TITLE = "Mancha"
-	APPID     = "com.nostr.mancha"
+	APPID     = "com.fiatjaf.mancha"
 )
 
-var baseSize = fyne.Size{Width: 900, Height: 640}
-
 var (
-	a    fyne.App
-	w    fyne.Window
 	k    Keystore
 	t    *CustomTheme
 	pool = nostr.NewSimplePool(context.Background())
 )
 
 func main() {
-	a = app.NewWithID(APPID)
-	w = a.NewWindow(APP_TITLE)
-	t = NewCustomTheme()
-	a.Settings().SetTheme(t)
-	w.Resize(baseSize)
+	app := gtk.NewApplication(APPID, gio.ApplicationFlagsNone)
+	app.ConnectActivate(func() { activate(app) })
+}
 
-	// keystore might be using the native keyring or falling back to just a file with a key
-	k = startKeystore()
+func activate(app *gtk.Application) {
+	topLabel := gtk.NewLabel("Text set by initializer")
+	topLabel.SetVExpand(true)
+	topLabel.SetHExpand(true)
 
-	leftBorderContainer := container.NewBorder(
-		nil,
-		container.NewPadded(getActionWidget().widget),
-		nil,
-		nil,
-		container.NewStack(
-			container.NewPadded(getGroupsWidget().widget),
-			getGroupsWidget().overlay,
-		),
-	)
+	bottomLabel := gtk.NewLabel("Text set by initializer")
+	bottomLabel.SetVExpand(true)
+	bottomLabel.SetHExpand(true)
 
-	rightBorderContainer := container.NewBorder(
-		nil,
-		container.NewPadded(getInputWidget().widget),
-		nil,
-		nil,
-		container.NewPadded(getMessagesWidget().widget),
-	)
+	box := gtk.NewBox(gtk.OrientationHorizontal, 0)
+	box.Append(topLabel)
+	box.Append(bottomLabel)
 
-	splitContainer := container.NewHSplit(leftBorderContainer, rightBorderContainer)
-	splitContainer.Offset = 0.35
+	window := gtk.NewApplicationWindow(app)
+	window.SetTitle(APP_TITLE)
+	window.SetChild(box)
+	window.SetDefaultSize(900, 640)
+	window.Show()
 
-	w.SetContent(splitContainer)
+	go func() {
+		var ix int
+		for t := range time.Tick(time.Second) {
+			// Make a copy of the state so we can reference it in the closure.
+			currentTime := t
+			currentIx := ix
+
+			ix++
+
+			glib.IdleAdd(func() {
+				topLabel.SetLabel(fmt.Sprintf("Set a label %d time(s)!", currentIx))
+				bottomLabel.SetLabel(fmt.Sprintf(
+					"Last updated at %s.",
+					currentTime.Format(time.StampMilli),
+				))
+			})
+		}
+	}()
 
 	go func() {
 		loadPeople()
@@ -71,12 +77,10 @@ func main() {
 				}
 			}(group)
 
-			getGroupsWidget().overlay.Hide()
+			// getGroupsWidget().overlay.Hide()
 		}
 
 		time.Sleep(time.Second * 1)
-		getInputWidget().onMount()
+		// getInputWidget().onMount()
 	}()
-
-	w.ShowAndRun()
 }
